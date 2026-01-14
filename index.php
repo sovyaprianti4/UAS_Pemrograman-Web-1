@@ -3,24 +3,49 @@ session_start();
 
 $url = isset($_GET['url']) ? $_GET['url'] : 'login';
 
+/* ===== PROTEKSI LOGIN ===== */
+if (!isset($_SESSION['login']) && !in_array($url, ['login','proses-login'])) {
+    header("Location: ?url=login");
+    exit;
+}
+
 switch ($url) {
 
     case 'login':
-        require_once "../app/views/auth/login.php";
+        require "../app/views/auth/login.php";
         break;
+
+    case 'proses-login':
+        // username & password BEBAS
+        $_SESSION['login'] = true;
+        $_SESSION['username'] = $_POST['username'];
+        $_SESSION['role'] = $_POST['role'];
+
+        header("Location: ?url=mahasiswa");
+        exit;
+
+    case 'logout':
+        session_destroy();
+        header("Location: ?url=login");
+        exit;
 
     case 'mahasiswa':
-        require_once "../app/views/mahasiswa/index.php";
+        require "../app/views/mahasiswa/index.php";
         break;
 
+    /* ===== ADMIN ONLY ===== */
     case 'tambah-mahasiswa':
-        require_once "../app/views/mahasiswa/tambah.php";
+        if ($_SESSION['role'] != 'admin') {
+            echo "<h3>Akses ditolak</h3>";
+            exit;
+        }
+        require "../app/views/mahasiswa/tambah.php";
         break;
 
     case 'simpan-mahasiswa':
-        require_once "../app/models/Mahasiswa.php";
-        $mhs = new Mahasiswa();
-        $mhs->insert(
+        if ($_SESSION['role'] != 'admin') exit;
+        require "../app/models/Mahasiswa.php";
+        (new Mahasiswa())->insert(
             $_POST['nim'],
             $_POST['nama'],
             $_POST['jurusan'],
@@ -30,13 +55,14 @@ switch ($url) {
         exit;
 
     case 'edit-mahasiswa':
-        require_once "../app/views/mahasiswa/edit.php";
+        if ($_SESSION['role'] != 'admin') exit;
+        require "../app/views/mahasiswa/edit.php";
         break;
 
     case 'update-mahasiswa':
-        require_once "../app/models/Mahasiswa.php";
-        $mhs = new Mahasiswa();
-        $mhs->update(
+        if ($_SESSION['role'] != 'admin') exit;
+        require "../app/models/Mahasiswa.php";
+        (new Mahasiswa())->update(
             $_POST['id'],
             $_POST['nim'],
             $_POST['nama'],
@@ -47,28 +73,11 @@ switch ($url) {
         exit;
 
     case 'hapus-mahasiswa':
-        require_once "../app/models/Mahasiswa.php";
-        $mhs = new Mahasiswa();
-        $mhs->delete($_GET['id']);
+        if ($_SESSION['role'] != 'admin') exit;
+        require "../app/models/Mahasiswa.php";
+        (new Mahasiswa())->delete($_GET['id']);
         header("Location: ?url=mahasiswa");
         exit;
-    case 'proses-login':
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    // akun login (untuk UAS)
-    if ($username == 'admin' && $password == 'admin123') {
-        $_SESSION['login'] = true;
-        header("Location: ?url=mahasiswa");
-    } else {
-        header("Location: ?url=login&error=1");
-    }
-    exit;
-
-case 'logout':
-    session_destroy();
-    header("Location: ?url=login");
-    exit;
 
     default:
         echo "Halaman tidak ditemukan";
