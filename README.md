@@ -65,3 +65,11 @@ Aplikasi memiliki sistem login dengan dua role pengguna:
 - Bootstrap 5
 - HTML & CSS
 - Konsep MVC (Model View Controller)
+
+---
+
+## Kesimpulan
+Aplikasi Manajemen Data Mahasiswa berhasil dibuat sesuai dengan ketentuan Project UAS Pemrograman Web.  
+Aplikasi telah menerapkan fitur CRUD, login dengan role, pencarian data, pagination, serta tampilan antarmuka menggunakan Bootstrap.
+
+---
